@@ -11,7 +11,7 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/src
 )
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 
 file(GLOB lib_srcs
   ${PROJECT_SOURCE_DIR}/src/*.cpp
