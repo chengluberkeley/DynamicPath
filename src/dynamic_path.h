@@ -21,7 +21,7 @@ struct TreeNode {
 	// We remove the reverse field to avoid confusion!
 	// int reversed;  // Only 1 or 0
 	bool external;
-	int node_index;  // Only for external nodes! 
+	int node_index;  // Only for external nodes!
 	TreeNode* bparent;
 	double netmin;
 	double netcost;

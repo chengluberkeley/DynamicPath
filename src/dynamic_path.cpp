@@ -147,7 +147,7 @@ TreeNode* dynamic_paths::before(TreeNode* v) {
 		return u;
 	else {
 		// Compute the reversal state of u
-		TreeNode* temp_u = u; 
+		TreeNode* temp_u = u;
 		status_var = temp_u->reversed;
 		while (temp_u->bparent != nullptr) {
 			temp_u = temp_u->bparent;
@@ -179,7 +179,7 @@ TreeNode* dynamic_paths::before(TreeNode* v) {
 
 	if (u->external)
 		return u;
-	
+
 	return u->btail;
 }
 
@@ -267,7 +267,7 @@ TreeNode* dynamic_paths::after(TreeNode* v) {
 double dynamic_paths::pcost_before(TreeNode* v) {
 	// Check if v is the head of path(v)
 	if (v == head(path(v))) return 0;
-	
+
 	// Back up the nodes
 	vector<TreeNode*> backup_nodes;
 	backup_nodes.push_back(v);
@@ -286,10 +286,12 @@ double dynamic_paths::pcost_before(TreeNode* v) {
 
 	// Find the deepest node w
 	// Here w is guaranteed to be non-null!
-	for (int i = 0; i < backup_nodes.size() - 1; ++i) {	
+	for (int i = 0; i < backup_nodes.size() - 1; ++i) {
 		if (backup_nodes[i + 1]->bright == backup_nodes[i])
 			return backup_nodes[i + 1]->netcost + grossmin[i + 1];
 	}
+
+    return 0;
 }
 
 double dynamic_paths::pcost_after(TreeNode* v) {
@@ -315,9 +317,11 @@ double dynamic_paths::pcost_after(TreeNode* v) {
 	// Find the deepest node w
 	// Here w is guaranteed to be non-null!
 	for (int i = 0; i < backup_nodes.size() - 1; ++i) {
-		if (backup_nodes[i + 1]->bleft == backup_nodes[i]) 
+		if (backup_nodes[i + 1]->bleft == backup_nodes[i])
 			return backup_nodes[i + 1]->netcost + grossmin[i + 1];
 	}
+
+    return 0;
 }
 
 bool pmincost_condition_before(TreeNode* u) {
@@ -334,10 +338,10 @@ TreeNode* dynamic_paths::pmincost_before(TreeNode* root) {
 	TreeNode* u = root;
 	while (!pmincost_condition_before(u)) {
 		if ((!u->bleft->external) && (close_to_zero(u->bleft->netmin))) {
-			u = u->bleft;		
+			u = u->bleft;
 		}
 		else if (u->netcost > 0) {
-			u = u->bright;		
+			u = u->bright;
 		}
 	}
 
@@ -649,13 +653,13 @@ TreeNode* dynamic_paths::rotateleft_(TreeNode* root) {
 
 	// Update the fields
 	// Change the shape
-	// Update the bleft and bright fields 
+	// Update the bleft and bright fields
 	root->bright = new_root->bleft;
 	new_root->bleft = root;
 	TreeNode* p = root->bleft;
 	TreeNode* q = root->bright;
 	TreeNode* r = new_root->bright;
-	
+
 	// reversed
 	/* q->reversed = q->reversed ^ (new_root->reversed);
 	r->reversed = r->reversed ^ (new_root->reversed);
