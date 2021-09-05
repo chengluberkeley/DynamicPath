@@ -1,62 +1,25 @@
 /*
-Copyright 2016-2018, Cheng Lu, chenglu@berkeley.edu
+Copyright 2016-2021, Cheng Lu, chenglu@berkeley.edu
 
 Implementation of the functions in dynamic_path.h
 */
 
 #include "dynamic_path.h"
 
+#include <cassert>
 #include <cmath>
 #include <iostream>
 #include <utility>
 
 using namespace std;
 
-typedef pair<TreeNode*, int> status_tuple;
-
-bool close_to_zero(double x) {
-	if (fabs(x) < 1e-6)
-		return true;
-	else
-		return false;
+static bool close_to_zero(double x) {
+    return fabs(x) < 1e-6;
 }
 
-int max(int i, int j) {
-	if (i >= j)
-		return i;
-	else
-		return j;
-}
+#pragma mark Public functions
 
-
-// Constructor
-dynamic_paths::dynamic_paths() {
-	// dps = nullptr;
-}
-
-// Destructor
-dynamic_paths::~dynamic_paths() {
-	// clearall_(dps);
-}
-
-// Public functions
-TreeNode* dynamic_paths::gen_new_node(bool is_external) {
-	TreeNode* p = new TreeNode();
-	// p->reversed = 0;
-	p->external = is_external;
-	p->node_index = 0;
-	p->bparent = nullptr;
-	p->netmin = 0;
-	p->netcost = 0;
-	p->bhead = nullptr;
-	p->bleft = nullptr;
-	p->bright = nullptr;
-	p->btail = nullptr;
-	p->height = 1;
-	return p;
-}
-
-TreeNode* dynamic_paths::gen_new_node(bool is_external, int node_index) {
+TreeNode* dynamic_path_ops::gen_new_node(bool is_external, int node_index) {
 	TreeNode* p = new TreeNode();
 	// p->reversed = 0;
 	p->external = is_external;
@@ -72,7 +35,11 @@ TreeNode* dynamic_paths::gen_new_node(bool is_external, int node_index) {
 	return p;
 }
 
-TreeNode* dynamic_paths::path(TreeNode* v) {
+TreeNode* dynamic_path_ops::path(TreeNode* v) {
+    if (!v) {
+        return nullptr;
+    }
+
 	while (v->bparent != nullptr) {
 		v = v->bparent;
 	}
@@ -80,87 +47,36 @@ TreeNode* dynamic_paths::path(TreeNode* v) {
 	return v;
 }
 
-TreeNode* dynamic_paths::head(TreeNode* p) {
-	/* if (p->reversed == 1) {
-		return p->btail;
-	}
-	else {
-		return p->bhead;
-	} */
+TreeNode* dynamic_path_ops::head(TreeNode* p) {
+    if (!p) {
+        return nullptr;
+    }
+
+    if (p->external) {
+        return p;
+    }
 
 	return p->bhead;
 }
 
-TreeNode* dynamic_paths::tail(TreeNode* p) {
-	/* if (p->reversed == 1) {
-		return p->bhead;
-	}
-	else {
-		return p->btail;
-	} */
+TreeNode* dynamic_path_ops::tail(TreeNode* p) {
+    if (!p) {
+        return nullptr;
+    }
+
+    if (p->external) {
+        return p;
+    }
 
 	return p->btail;
 }
 
-TreeNode* dynamic_paths::before(TreeNode* v) {
-	// Back up the nodes
-	/* vector<status_tuple> status;
-	status.push_back(make_pair(v, v->reversed));
-	v = v->bparent;
-	while (v != nullptr) {
-		status.push_back(make_pair(v, v->reversed));
-		v = v->bparent;
-	}
+TreeNode* dynamic_path_ops::before(TreeNode* v) {
+    if (!v) {
+        return nullptr;
+    }
 
-	// Compute node reversal states
-	int status_var = status[status.size() - 1].second;
-	for (int i = status.size() - 2; i >= 0; --i) {
-		status_var = status_var ^ (status[i].second);
-		status[i].second = status_var;
-	} */
-
-	// Find the deepest node w
-	// Find node u
-	/* TreeNode* w = nullptr;
-	TreeNode* u = nullptr;
-	for (int i = 0; i < status.size() - 1; ++i) {
-		if (status[i + 1].second == 0) {
-			if (status[i + 1].first->bright == status[i].first) {
-				w = status[i].first;
-				u = status[i + 1].first->bleft;
-				break;
-			}
-		}
-		else {
-			if (status[i + 1].first->bleft == status[i].first) {
-				w = status[i].first;
-				u = status[i + 1].first->bright;
-				break;
-			}
-		}
-	}
-
-	if (w == nullptr)
-		return nullptr;
-
-	if (u->external)
-		return u;
-	else {
-		// Compute the reversal state of u
-		TreeNode* temp_u = u;
-		status_var = temp_u->reversed;
-		while (temp_u->bparent != nullptr) {
-			temp_u = temp_u->bparent;
-			status_var = status_var ^ (temp_u->reversed);
-		}
-
-		if (status_var == 0) {
-			return u->btail;
-		}
-		else {
-			return u->bhead;
-		}
-	} */
+    assert(v->external);
 
 	TreeNode* w = v;
 	TreeNode* w_parent = w->bparent;
@@ -183,65 +99,12 @@ TreeNode* dynamic_paths::before(TreeNode* v) {
 	return u->btail;
 }
 
-TreeNode* dynamic_paths::after(TreeNode* v) {
-	// Back up the nodes
-	/* vector<status_tuple> status;
-	status.push_back(make_pair(v, v->reversed));
-	v = v->bparent;
-	while (v != nullptr) {
-		status.push_back(make_pair(v, v->reversed));
-		v = v->bparent;
-	}
+TreeNode* dynamic_path_ops::after(TreeNode* v) {
+    if (!v) {
+        return nullptr;
+    }
 
-	// Compute node reversal states
-	int status_var = status[status.size() - 1].second;
-	for (int i = status.size() - 2; i >= 0; --i) {
-		status_var = status_var ^ (status[i].second);
-		status[i].second = status_var;
-	}
-
-	// Find the deepest node w
-	// Find node u
-	TreeNode* w = nullptr;
-	TreeNode* u = nullptr;
-	for (int i = 0; i < status.size() - 1; ++i) {
-		if (status[i + 1].second == 0) {
-			if (status[i + 1].first->bleft == status[i].first) {
-				w = status[i].first;
-				u = status[i + 1].first->bright;
-				break;
-			}
-		}
-		else {
-			if (status[i + 1].first->bright == status[i].first) {
-				w = status[i].first;
-				u = status[i + 1].first->bleft;
-				break;
-			}
-		}
-	}
-
-	if (w == nullptr)
-		return nullptr;
-
-	if (u->external)
-		return u;
-	else {
-		// Compute the reversal state of u
-		TreeNode* temp_u = u;
-		status_var = temp_u->reversed;
-		while (temp_u->bparent != nullptr) {
-			temp_u = temp_u->bparent;
-			status_var = status_var ^ (temp_u->reversed);
-		}
-
-		if (status_var == 0) {
-			return u->bhead;
-		}
-		else {
-			return u->btail;
-		}
-	} */
+    assert(v->external);
 
 	TreeNode* w = v;
 	TreeNode* w_parent = w->bparent;
@@ -264,9 +127,15 @@ TreeNode* dynamic_paths::after(TreeNode* v) {
 	return u->bhead;
 }
 
-double dynamic_paths::pcost_before(TreeNode* v) {
+double dynamic_path_ops::pcost_before(TreeNode* v) {
+    if (!v) {
+        return static_cast<double>(NAN);
+    }
+
+    assert(v->external);
+
 	// Check if v is the head of path(v)
-	if (v == head(path(v))) return 0;
+	if (v == head(path(v))) return static_cast<double>(NAN);
 
 	// Back up the nodes
 	vector<TreeNode*> backup_nodes;
@@ -280,23 +149,29 @@ double dynamic_paths::pcost_before(TreeNode* v) {
 	// Compute grossmin values
 	vector<double> grossmin(backup_nodes.size(), 0);
 	grossmin[grossmin.size() - 1] = backup_nodes[backup_nodes.size() - 1]->netmin;
-	for (int i = grossmin.size() - 2; i >= 0; --i) {
+	for (int i = static_cast<int>(grossmin.size()) - 2; i >= 1; --i) {
 		grossmin[i] = grossmin[i + 1] + backup_nodes[i]->netmin;
 	}
 
-	// Find the deepest node w
+	// Find the deepest node w that is the right child of its parent.
 	// Here w is guaranteed to be non-null!
-	for (int i = 0; i < backup_nodes.size() - 1; ++i) {
+	for (std::size_t i = 0; i < backup_nodes.size() - 1; ++i) {
 		if (backup_nodes[i + 1]->bright == backup_nodes[i])
 			return backup_nodes[i + 1]->netcost + grossmin[i + 1];
 	}
 
-    return 0;
+    return static_cast<double>(NAN);
 }
 
-double dynamic_paths::pcost_after(TreeNode* v) {
+double dynamic_path_ops::pcost_after(TreeNode* v) {
+    if (!v) {
+        return static_cast<double>(NAN);
+    }
+
+    assert(v->external);
+
 	// Check if v is the tail of path(v)
-	if (v == tail(path(v))) return 0;
+	if (v == tail(path(v))) return static_cast<double>(NAN);
 
 	// Back up the nodes
 	vector<TreeNode*> backup_nodes;
@@ -310,21 +185,21 @@ double dynamic_paths::pcost_after(TreeNode* v) {
 	// Compute grossmin values
 	vector<double> grossmin(backup_nodes.size(), 0);
 	grossmin[grossmin.size() - 1] = backup_nodes[backup_nodes.size() - 1]->netmin;
-	for (int i = grossmin.size() - 2; i >= 0; --i) {
+	for (int i = static_cast<int>(grossmin.size()) - 2; i >= 1; --i) {
 		grossmin[i] = grossmin[i + 1] + backup_nodes[i]->netmin;
 	}
 
-	// Find the deepest node w
+	// Find the deepest node w that is the left child of its parent.
 	// Here w is guaranteed to be non-null!
-	for (int i = 0; i < backup_nodes.size() - 1; ++i) {
+	for (std::size_t i = 0; i < backup_nodes.size() - 1; ++i) {
 		if (backup_nodes[i + 1]->bleft == backup_nodes[i])
 			return backup_nodes[i + 1]->netcost + grossmin[i + 1];
 	}
 
-    return 0;
+    return static_cast<double>(NAN);
 }
 
-bool pmincost_condition_before(TreeNode* u) {
+static bool pmincost_condition_before(TreeNode* u) {
 	if (!close_to_zero(u->netcost)) return false;
 	if ((u->bleft->external) || (u->bleft->netmin > 0))
 		return true;
@@ -332,15 +207,15 @@ bool pmincost_condition_before(TreeNode* u) {
 		return false;
 }
 
-TreeNode* dynamic_paths::pmincost_before(TreeNode* root) {
-	if (root->external) return nullptr;
+TreeNode* dynamic_path_ops::pmincost_before(TreeNode* root) {
+	if (!root || root->external) return nullptr;
 
 	TreeNode* u = root;
 	while (!pmincost_condition_before(u)) {
 		if ((!u->bleft->external) && (close_to_zero(u->bleft->netmin))) {
-			u = u->bleft;
-		}
-		else if (u->netcost > 0) {
+            u = u->bleft;
+		} else { // u->netcost > 0
+            assert(u->netcost > 0);
 			u = u->bright;
 		}
 	}
@@ -351,7 +226,7 @@ TreeNode* dynamic_paths::pmincost_before(TreeNode* root) {
 		return u->bright->bhead;
 }
 
-bool pmincost_condition_after(TreeNode* u) {
+static bool pmincost_condition_after(TreeNode* u) {
 	if (!close_to_zero(u->netcost)) return false;
 	if ((u->bright->external) || (u->bright->netmin > 0))
 		return true;
@@ -359,15 +234,15 @@ bool pmincost_condition_after(TreeNode* u) {
 		return false;
 }
 
-TreeNode* dynamic_paths::pmincost_after(TreeNode* root) {
-	if (root->external) return nullptr;
+TreeNode* dynamic_path_ops::pmincost_after(TreeNode* root) {
+	if (!root || root->external) return nullptr;
 
 	TreeNode* u = root;
 	while (!pmincost_condition_after(u)) {
 		if ((!u->bright->external) && (close_to_zero(u->bright->netmin))) {
 			u = u->bright;
-		}
-		else if (u->netcost > 0) {
+        } else { // u->netcost > 0
+            assert(u->netcost > 0);
 			u = u->bleft;
 		}
 	}
@@ -378,25 +253,40 @@ TreeNode* dynamic_paths::pmincost_after(TreeNode* root) {
 		return u->bleft->btail;
 }
 
-void dynamic_paths::pupdate(TreeNode* root, double x) {
+void dynamic_path_ops::pupdate(TreeNode* root, double x) {
+    if (!root) {
+        return;
+    }
+
+    assert(!root->external);
+
 	root->netmin = root->netmin + x;
 }
 
-TreeNode* dynamic_paths::concatenate(TreeNode* p, TreeNode* q, double x) {
-	if ((p == nullptr) || (q == nullptr)) return nullptr;
+TreeNode* dynamic_path_ops::concatenate(TreeNode* p, TreeNode* q, double x) {
+    if (p == nullptr) {
+        return q;
+    } else if (q == nullptr) {
+        return p;
+    }
 
 	TreeNode* root = construct_(p, q, x);
 	root = top_down_balance_(root);
 	return root;
 }
 
-// head(path(v)) to before(v); v to tail(path(v))
-void dynamic_paths::split_before(TreeNode* v, TreeNode*& p, TreeNode*&  q, double& x) {
+void dynamic_path_ops::split_before(TreeNode* v, TreeNode*& p, TreeNode*& q, double& x) {
+    if (!v) {
+        return;
+    }
+
+    assert(v->external);
+
 	// Similar to the code of pcost_before, we need to first locate the tree node corresponding to the edge [head(v), v]
 	if (v == head(path(v))) {
 		p = nullptr;
 		q = path(v);
-		x = 0;
+		x = static_cast<double>(NAN);
 		return;
 	}
 
@@ -410,15 +300,16 @@ void dynamic_paths::split_before(TreeNode* v, TreeNode*& p, TreeNode*&  q, doubl
 		v = v->bparent;
 	}
 
-	// Find the deepest node w
+	// Find the deepest node w that is the right child of its parent.
 	// Here w is guaranteed to be non-null!
-	int edge_index;
-	for (int i = 0; i < backup_nodes.size() - 1; ++i) {
+	std::size_t edge_index = 0;
+	for (std::size_t i = 0; i < backup_nodes.size() - 1; ++i) {
 		if (backup_nodes[i + 1]->bright == backup_nodes[i]) {
 			edge_index = i + 1;
 			break;
 		}
 	}
+    assert(edge_index > 0);
 
 	// Start to split the path
 	// Initialization
@@ -434,7 +325,7 @@ void dynamic_paths::split_before(TreeNode* v, TreeNode*& p, TreeNode*&  q, doubl
 	TreeNode* temp_w;
 	double temp_x;
 	// From root to the parent of the edge
-	for (int i = backup_nodes.size() - 1; i >= edge_index + 1; --i) {
+	for (int i = static_cast<int>(backup_nodes.size()) - 1; i >= edge_index + 1; --i) {
 		if (backup_nodes[i]->bleft == backup_nodes[i - 1]) {
 			// Destroy the tree
 			destroy_(backup_nodes[i], temp_v, temp_w, temp_x);
@@ -456,24 +347,29 @@ void dynamic_paths::split_before(TreeNode* v, TreeNode*& p, TreeNode*&  q, doubl
 
 	// Generate p
 	p = p_list[0];
-	for (int i = 1; i < p_list.size(); ++i) {
+	for (std::size_t i = 1; i < p_list.size(); ++i) {
 		p = concatenate(p, p_list[i], p_cost_list[i - 1]);
 	}
 
 	// Generate q
 	q = q_list[0];
-	for (int i = 1; i < q_list.size(); ++i) {
+	for (std::size_t i = 1; i < q_list.size(); ++i) {
 		q = concatenate(q_list[i], q, q_cost_list[i - 1]);
 	}
 }
 
-// head(path(v)) to v; after(v) to tail(path(v))
-void dynamic_paths::split_after(TreeNode* v, TreeNode* & p, TreeNode* & q, double& y) {
+void dynamic_path_ops::split_after(TreeNode* v, TreeNode*& p, TreeNode*& q, double& y) {
+    if (!v) {
+        return;
+    }
+
+    assert(v->external);
+
 	// Similar to the code of pcost_after, we need to first locate the tree node corresponding to the edge [v, after(v)]
 	if (v == tail(path(v))) {
 		p = path(v);
 		q = nullptr;
-		y = 0;
+		y = static_cast<double>(NAN);
 		return;
 	}
 
@@ -487,15 +383,16 @@ void dynamic_paths::split_after(TreeNode* v, TreeNode* & p, TreeNode* & q, doubl
 		v = v->bparent;
 	}
 
-	// Find the deepest node w
+	// Find the deepest node w that is the left child of its parent.
 	// Here w is guaranteed to be non-null!
-	int edge_index;
-	for (int i = 0; i < backup_nodes.size() - 1; ++i) {
+	std::size_t edge_index = 0;
+	for (std::size_t i = 0; i < backup_nodes.size() - 1; ++i) {
 		if (backup_nodes[i + 1]->bleft == backup_nodes[i]) {
 			edge_index = i + 1;
 			break;
 		}
 	}
+    assert(edge_index > 0);
 
 	// Start to split the path
 	// Initialization
@@ -511,7 +408,7 @@ void dynamic_paths::split_after(TreeNode* v, TreeNode* & p, TreeNode* & q, doubl
 	TreeNode* temp_w;
 	double temp_y;
 	// From root to the parent of the edge
-	for (int i = backup_nodes.size() - 1; i >= edge_index + 1; --i) {
+	for (int i = static_cast<int>(backup_nodes.size()) - 1; i >= edge_index + 1; --i) {
 		if (backup_nodes[i]->bleft == backup_nodes[i - 1]) {
 			// Destroy the tree
 			destroy_(backup_nodes[i], temp_v, temp_w, temp_y);
@@ -533,44 +430,55 @@ void dynamic_paths::split_after(TreeNode* v, TreeNode* & p, TreeNode* & q, doubl
 
 	// Generate p
 	p = p_list[0];
-	for (int i = 1; i < p_list.size(); ++i) {
+	for (std::size_t i = 1; i < p_list.size(); ++i) {
 		p = concatenate(p, p_list[i], p_cost_list[i - 1]);
 	}
 
 	// Generate q
 	q = q_list[0];
-	for (int i = 1; i < q_list.size(); ++i) {
+	for (std::size_t i = 1; i < q_list.size(); ++i) {
 		q = concatenate(q_list[i], q, q_cost_list[i - 1]);
 	}
 }
 
-void dynamic_paths::print(TreeNode* root, double min_value) {
-	if ((root == nullptr) || (root->external)) return;
-	print(root->bleft, root->netmin + min_value);
-	double grossmin = root->netmin + min_value;
-	cout << root->netcost + grossmin << " ";
-	print(root->bright, root->netmin + min_value);
+static void vectorize_internal(TreeNode* root, double gross_min, vector<double>& vector_path) {
+    if ((root == nullptr) || (root->external)) return;
+    vectorize_internal(root->bleft, root->netmin + gross_min, vector_path);
+    double grossmin = root->netmin + gross_min;
+    vector_path.push_back(root->netcost + grossmin);
+    vectorize_internal(root->bright, root->netmin + gross_min, vector_path);
 }
 
-void dynamic_paths::clearall(TreeNode* p) {
-	if (p == nullptr) return;
+void dynamic_path_ops::vectorize(TreeNode* root, vector<double>& vector_path) {
+    if (!root) {
+        return;
+    }
 
-	if (p->bleft != nullptr) {
+    assert(vector_path.empty());
+
+    vectorize_internal(root, 0, vector_path);
+}
+
+void dynamic_path_ops::clearall(TreeNode* p) {
+	if (!p) return;
+
+	if (!p->bleft) {
 		clearall(p->bleft);
 	}
 
-	if (p->bright != nullptr) {
+	if (!p->bright) {
 		clearall(p->bright);
 	}
 
 	delete p;
 }
 
-// Private functions
-TreeNode* dynamic_paths::construct_(TreeNode* v, TreeNode* w, double x) {
+#pragma mark Private interface functions
+
+TreeNode* dynamic_path_ops::construct_(TreeNode* v, TreeNode* w, double x) {
 	if ((v == nullptr) || (w == nullptr)) return nullptr;
 
-	TreeNode* root = gen_new_node(false);
+	TreeNode* root = gen_new_node(false, 0);
 	// Compute grossmin
 	double gross_min = x;
 	if (!v->external) {
@@ -619,7 +527,7 @@ TreeNode* dynamic_paths::construct_(TreeNode* v, TreeNode* w, double x) {
 	return root;
 }
 
-void dynamic_paths::destroy_(TreeNode* root, TreeNode* &v, TreeNode* &w, double& x) {
+void dynamic_path_ops::destroy_(TreeNode* root, TreeNode* &v, TreeNode* &w, double& x) {
 	if ((root == nullptr) || (root->external)) return;
 
 	v = root->bleft;
@@ -642,7 +550,7 @@ void dynamic_paths::destroy_(TreeNode* root, TreeNode* &v, TreeNode* &w, double&
 	delete root;
 }
 
-TreeNode* dynamic_paths::rotateleft_(TreeNode* root) {
+TreeNode* dynamic_path_ops::rotateleft_(TreeNode* root) {
 	if (root == nullptr) return nullptr;
 
 	// Make sure the root has an internal right child
@@ -723,7 +631,7 @@ TreeNode* dynamic_paths::rotateleft_(TreeNode* root) {
 	return new_root;
 }
 
-TreeNode* dynamic_paths::rotateright_(TreeNode* root) {
+TreeNode* dynamic_path_ops::rotateright_(TreeNode* root) {
 	if (root == nullptr) return nullptr;
 
 	// Make sure the root has an internal right child
@@ -805,7 +713,11 @@ TreeNode* dynamic_paths::rotateright_(TreeNode* root) {
 	return new_root;
 }
 
-TreeNode* dynamic_paths::top_down_balance_(TreeNode* root) {
+TreeNode* dynamic_path_ops::top_down_balance_(TreeNode* root) {
+    if (!root) {
+        return nullptr;
+    }
+
 	TreeNode* p = root->bleft;
 	TreeNode* q = root->bright;
 
