@@ -12,9 +12,13 @@ include_directories(
 )
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 file(GLOB lib_srcs
   ${PROJECT_SOURCE_DIR}/src/*.cpp
 )
 
 add_library(dynamic_path STATIC ${lib_srcs})
+
+add_executable(test_main ${PROJECT_SOURCE_DIR}/main.cpp)
+target_link_libraries(test_main PRIVATE dynamic_path)
