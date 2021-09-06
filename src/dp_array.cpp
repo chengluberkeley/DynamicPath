@@ -36,11 +36,11 @@ void dp_array::init_dynamic_path(const vector<double>& input) {
 		m_root = m_dp_ops.concatenate(m_root, m_external_nodes[i + 1], input[i]);
 	}
 
-	print_height();
+	// print_height();
 }
 
 void dp_array::update_constant(int i_k, double w) {
-    if (!m_root || i_k > m_external_nodes.size()) {
+    if (!m_root || i_k < 0 || i_k > m_external_nodes.size()) {
         return;
     }
 
@@ -51,7 +51,26 @@ void dp_array::update_constant(int i_k, double w) {
 	m_dp_ops.pupdate(q, w);
     m_root = m_dp_ops.concatenate(p, q, x);
 
-	print_height();
+	// print_height();
+}
+
+void dp_array::update_constant(int i_k, int i_l, double w) {
+    if (!m_root || i_k >= i_l || i_k < 0 || i_l > m_external_nodes.size()) {
+        return;
+    }
+
+    TreeNode* p1 = nullptr;
+    TreeNode* p2 = nullptr;
+    TreeNode* p3 = nullptr;
+    double x12;
+    double x23;
+    m_dp_ops.split_before(m_external_nodes[i_k], p1, p2, x12);
+    m_dp_ops.split_after(m_external_nodes[i_l], p2, p3, x23);
+    m_dp_ops.pupdate(p2, w);
+    m_root = m_dp_ops.concatenate(p1, p2, x12);
+    m_root = m_dp_ops.concatenate(m_root, p3, x23);
+
+    // print_height();
 }
 
 double dp_array::min_cost(int i_k) {
@@ -71,7 +90,33 @@ double dp_array::min_cost(int i_k) {
 
     m_root = m_dp_ops.concatenate(p, q, x);
 
-    print_height();
+    // print_height();
+
+    return cost;
+}
+
+double dp_array::min_cost(int i_k, int i_l) {
+    if (!m_root || i_k > i_l || i_k < 0 || i_l > m_external_nodes.size()) {
+        return static_cast<double>(NAN);
+    }
+
+    TreeNode* p1 = nullptr;
+    TreeNode* p2 = nullptr;
+    TreeNode* p3 = nullptr;
+    double x12;
+    double x23;
+    m_dp_ops.split_before(m_external_nodes[i_k], p1, p2, x12);
+    m_dp_ops.split_after(m_external_nodes[i_l], p2, p3, x23);
+    double cost = static_cast<double>(NAN);
+    if (p2 != nullptr) {
+        TreeNode* minNode = m_dp_ops.pmincost_before(p2);
+        cost = m_dp_ops.pcost_before(minNode);
+    }
+
+    m_root = m_dp_ops.concatenate(p1, p2, x12);
+    m_root = m_dp_ops.concatenate(m_root, p3, x23);
+
+    // print_height();
 
     return cost;
 }

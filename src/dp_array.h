@@ -44,12 +44,30 @@ class dp_array {
     void update_constant(int i_k, double w);
 
     /**
+     * \brief Update costs of all edges in the (sub-)path (i_k, i_l) by a constant w.
+     *
+     * \param[in] i_k Index of the head vertex of the (sub-)path.
+     * \param[in] i_l Index of the tail vertex of the (sub-)path.
+     * \param[in] w Constant (no restriction in sign) to be added to every edge of the (sub-)path.
+     */
+    void update_constant(int i_k, int i_l, double w);
+
+    /**
      * \brief Get the minimum edge cost of all edges in the (sub-)path (i_k, tail).
      *
      * \param[in] i_k Index of the head vertex of the (sub-)path.
      * \return Minimum edge cost of all edges in the (sub-)path (i_k, tail).
      */
     double min_cost(int i_k);
+
+    /**
+     * \brief Get the minimum edge cost of all edges in the (sub-)path (i_k, i_l).
+     *
+     * \param[in] i_k Index of the head vertex of the (sub-)path.
+     * \param[in] i_l Index of the tail vertex of the (sub-)path.
+     * \return Minimum edge cost of all edges in the (sub-)path (i_k, i_l).
+     */
+    double min_cost(int i_k, int i_l);
 
     /**
      * \brief Print the height of the generated binary tree of the dynamic path to verify tree balance.
