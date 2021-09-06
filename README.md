@@ -39,4 +39,4 @@ mkdir build && cd build
 cmake .. && make -j5
 ```
 
-It builds a static library `libdynamic_path.a` under the directory `lib/`.
+It builds a static library `libdynamic_path.a` under the directory `lib/`, and an executable for testing arrays under the directory `bin/`.
