@@ -40,3 +40,10 @@ cmake .. && make -j5
 ```
 
 It builds a static library `libdynamic_path.a` under the directory `lib/`, and an executable for testing arrays under the directory `bin/`.
+
+## References
+
+Please cite the papers if you use the dynamic path data structure in your work.
+
+**Sleator, D.D. and Tarjan, R.E.** A data structure for dynamic trees. *J. Comput. Sys. Sci.*, 24: 362-391, 1983.
+**Hochbaum, D.S. and Lu, C.** A faster algorithm solving a generalization of isotonic median regression and a class of fused lasso problems. *SIAM J. Opt.*, 27(4): 2563-2596, 2017.
