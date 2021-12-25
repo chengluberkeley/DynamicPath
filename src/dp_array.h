@@ -11,9 +11,8 @@ Date Created: Oct. 27, 2016.
 #pragma once
 
 #include "dynamic_path.h"
-#include <vector>
 
-using namespace std;
+#include <vector>
 
 /**
  * \brief Concrete dynamic path class containing both states and operations.
@@ -23,17 +22,17 @@ using namespace std;
 class dp_array {
   public:
     /**
-     * \brief Destructor to release all memory.
-     */
-    ~dp_array();
-
-    /**
      * \brief Initialize a dynamic path data structure from the raw input vector.
-     * The root TreeNode of the constructed dynamic path data structure is assigned to its member variable, `m_root`.
+     * The generated dynamic path is (0, 1, ..., input.size()), where edge (i, i+1) has cost input[i].
      *
      * \param[in] input Raw input vector to initialize the dynamic path data structure from.
      */
-    void init_dynamic_path(const vector<double>& input);
+    dp_array(const std::vector<double>& input);
+
+    /**
+     * \brief Destructor to release all memory.
+     */
+    ~dp_array();
 
     /**
      * \brief Update costs of all edges in the (sub-)path (i_k, tail) by a constant w.
@@ -53,39 +52,80 @@ class dp_array {
     void update_constant(int i_k, int i_l, double w);
 
     /**
-     * \brief Get the minimum edge cost of all edges in the (sub-)path (i_k, tail).
+     * \brief Get the minimum edge cost of all edges in the (sub-)path (i_k, tail),
+     * and the first edge (closest to path head) achieving the minimum.
      *
      * \param[in] i_k Index of the head vertex of the (sub-)path.
+     * \param[out] min_index Index of the first edge, closest to path head,
+     * such that (min_index, min_index + 1) achieving the minimum.
      * \return Minimum edge cost of all edges in the (sub-)path (i_k, tail).
+     * NaN (Not-A-Number) if input i_k is not valid.
      */
-    double min_cost(int i_k);
+    double min_cost_first(int i_k, int& min_index);
 
     /**
-     * \brief Get the minimum edge cost of all edges in the (sub-)path (i_k, i_l).
+     * \brief Get the minimum edge cost of all edges in the (sub-)path (i_k, i_l),
+     * and the first edge (closes to path head) achieving the minimum.
      *
      * \param[in] i_k Index of the head vertex of the (sub-)path.
      * \param[in] i_l Index of the tail vertex of the (sub-)path.
+     * \param[out] min_index Index of the first edge, closest to path head,
+     * such that (min_index, min_index + 1) achieving the minimum.
      * \return Minimum edge cost of all edges in the (sub-)path (i_k, i_l).
+     * NaN (Not-A-Number) if input (sub-)path (i_k, i_l) is not valid.
      */
-    double min_cost(int i_k, int i_l);
+    double min_cost_first(int i_k, int i_l, int& min_index);
 
     /**
-     * \brief Print the height of the generated binary tree of the dynamic path to verify tree balance.
+     * \brief Get the minimum edge cost of all edges in the (sub-)path (i_k, tail),
+     * and the last edge (closest to path tail) achieving the minimum.
+     *
+     * \param[in] i_k Index of the head vertex of the (sub-)path.
+     * \param[out] min_index Index of the last edge, closest to path tail,
+     * such that (min_index, min_index + 1) achieving the minimum.
+     * \return Minimum edge cost of all edges in the (sub-)path (i_k, tail).
+     * NaN (Not-A-Number) if input i_k is not valid.
      */
-    void print_height();
+    double min_cost_last(int i_k, int& min_index);
+
+    /**
+     * \brief Get the minimum edge cost of all edges in the (sub-)path (i_k, i_l),
+     * and the last edge (closes to path tail) achieving the minimum.
+     *
+     * \param[in] i_k Index of the head vertex of the (sub-)path.
+     * \param[in] i_l Index of the tail vertex of the (sub-)path.
+     * \param[out] min_index Index of the last edge, closest to path tail,
+     * such that (min_index, min_index + 1) achieving the minimum.
+     * \return Minimum edge cost of all edges in the (sub-)path (i_k, i_l).
+     * NaN (Not-A-Number) if input (sub-)path (i_k, i_l) is not valid.
+     */
+    double min_cost_last(int i_k, int i_l, int& min_index);
 
     /**
      * \brief Vectorize the internal dynamic path data structure to an std::vector.
      *
-     * \param[out] output Vector to hold the vectorized results.
+     * \param[out] output std::vector to hold the vectorized results.
      * \return True if the vectorization is successful, False otherwise.
      */
-    bool vectorize(vector<double>& output);
+    bool vectorize(std::vector<double>& output) const;
 
-    // TODO: Add more API functions to completely hide (private) the below data fields and dynamic path binary tree operations.
+    /**
+     * \brief Get number of edges in the dynamic path.
+     *
+     * \return Number of edges in the dynamic path.
+     */
+    std::size_t edge_num() const;
 
+    /**
+     * \brief Get the number of vertices in the dynamic path.
+     *
+     * \return Number of vertices in the dynamic path.
+     */
+    std::size_t vertex_num() const;
+
+  private:
     // Data field
-    vector<TreeNode*> m_external_nodes;
+    std::vector<TreeNode*> m_external_nodes;
     TreeNode* m_root = nullptr;
     dynamic_path_ops m_dp_ops;
 };
