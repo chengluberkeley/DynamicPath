@@ -17,16 +17,16 @@ Date Created: Oct. 24, 2016.
 // Tree node structure for dynamic path
 struct TreeNode {
     bool external = false;
-	int node_index;  // Valid only for "external" nodes
-	TreeNode* bparent;
-	double netmin;
-	double netcost;
-	TreeNode* bhead;
-	TreeNode* bleft;
-	TreeNode* bright;
-	TreeNode* btail;
-	// For tree balance
-	int height;
+    int node_index;  // Valid only for "external" nodes
+    TreeNode* bparent;
+    double netmin;
+    double netcost;
+    TreeNode* bhead;
+    TreeNode* bleft;
+    TreeNode* bright;
+    TreeNode* btail;
+    // For tree balance
+    int height;
 };
 
 /**
