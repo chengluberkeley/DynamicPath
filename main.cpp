@@ -41,7 +41,7 @@ bool cost_inorder(const dynamic_path_ops& tree_ops, TreeNode* root, const std::v
     return true;
 }
 
-void subpathAllCorrect(const dynamic_path_ops& tree_ops, TreeNode* root, const std::vector<TreeNode*>& external_nodes,
+void subpathAllCorrect(const dynamic_path_ops& tree_ops, TreeNode*& root, const std::vector<TreeNode*>& external_nodes,
                        const std::vector<double>& cost_reference, const std::vector<int>& index_reference) {
     assert(external_nodes.size() == index_reference.size());
     assert(external_nodes.size() == cost_reference.size() + 1);

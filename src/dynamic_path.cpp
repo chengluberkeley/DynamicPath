@@ -518,11 +518,11 @@ void dynamic_path_ops::vectorize(TreeNode* p, std::vector<int> &vector_vertices)
 void dynamic_path_ops::clearall(TreeNode* p) const {
     if (!p) return;
 
-    if (!p->bleft) {
+    if (p->bleft) {
         clearall(p->bleft);
     }
 
-    if (!p->bright) {
+    if (p->bright) {
         clearall(p->bright);
     }
 
