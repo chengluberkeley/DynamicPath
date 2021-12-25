@@ -25,7 +25,7 @@ dp_array::dp_array(const std::vector<double>& input) {
 }
 
 dp_array::~dp_array() {
-	m_dp_ops.clearall(m_root);
+    m_dp_ops.clearall(m_root);
 }
 
 void dp_array::update_constant(int i_k, double w) {
@@ -33,11 +33,11 @@ void dp_array::update_constant(int i_k, double w) {
         return;
     }
 
-	TreeNode* p = nullptr;
-	TreeNode* q = nullptr;
-	double x;
-	m_dp_ops.split_before(m_external_nodes[i_k], p, q, x);
-	m_dp_ops.pupdate(q, w);
+    TreeNode* p = nullptr;
+    TreeNode* q = nullptr;
+    double x;
+    m_dp_ops.split_before(m_external_nodes[i_k], p, q, x);
+    m_dp_ops.pupdate(q, w);
     m_root = m_dp_ops.concatenate(p, q, x);
 }
 
