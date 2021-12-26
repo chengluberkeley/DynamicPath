@@ -282,6 +282,10 @@ static bool operator == (const dp_array& dynamic_array, const std::vector<double
     }
 
     for (std::size_t i = 0; i < output.size(); ++i) {
+        if (fabs(dynamic_array.edge_cost(static_cast<int>(i)) - reference[i]) >= 1e-6) {
+            return false;
+        }
+
         if (fabs(output[i] - reference[i]) >= 1e-6) {
             return false;
         }

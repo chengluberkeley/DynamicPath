@@ -28,8 +28,16 @@ dp_array::~dp_array() {
     m_dp_ops.clearall(m_root);
 }
 
+double dp_array::edge_cost(int i_k) const {
+    if (!m_root || i_k < 0 || i_k >= m_external_nodes.size() - 1) {
+        return static_cast<double>(NAN);
+    }
+
+    return m_dp_ops.pcost_after(m_external_nodes[i_k]);
+}
+
 void dp_array::update_constant(int i_k, double w) {
-    if (!m_root || i_k < 0 || i_k >= m_external_nodes.size()) {
+    if (!m_root || i_k < 0 || i_k >= m_external_nodes.size() - 1) {
         return;
     }
 
@@ -42,7 +50,7 @@ void dp_array::update_constant(int i_k, double w) {
 }
 
 void dp_array::update_constant(int i_k, int i_l, double w) {
-    if (!m_root || i_k >= i_l || i_k < 0 || i_l > m_external_nodes.size()) {
+    if (!m_root || i_k >= i_l || i_k < 0 || i_l >= m_external_nodes.size()) {
         return;
     }
 
@@ -59,7 +67,7 @@ void dp_array::update_constant(int i_k, int i_l, double w) {
 }
 
 double dp_array::min_cost_first(int i_k, int& min_index) {
-    if (!m_root || i_k < 0 || i_k >= m_external_nodes.size()) {
+    if (!m_root || i_k < 0 || i_k >= m_external_nodes.size() - 1) {
         return static_cast<double>(NAN);
     }
 
@@ -78,7 +86,7 @@ double dp_array::min_cost_first(int i_k, int& min_index) {
 }
 
 double dp_array::min_cost_first(int i_k, int i_l, int& min_index) {
-    if (!m_root || i_k >= i_l || i_k < 0 || i_l > m_external_nodes.size()) {
+    if (!m_root || i_k >= i_l || i_k < 0 || i_l >= m_external_nodes.size()) {
         return static_cast<double>(NAN);
     }
 
@@ -101,7 +109,7 @@ double dp_array::min_cost_first(int i_k, int i_l, int& min_index) {
 }
 
 double dp_array::min_cost_last(int i_k, int& min_index) {
-    if (!m_root || i_k < 0 || i_k >= m_external_nodes.size()) {
+    if (!m_root || i_k < 0 || i_k >= m_external_nodes.size() - 1) {
         return static_cast<double>(NAN);
     }
 
@@ -120,7 +128,7 @@ double dp_array::min_cost_last(int i_k, int& min_index) {
 }
 
 double dp_array::min_cost_last(int i_k, int i_l, int& min_index) {
-    if (!m_root || i_k >= i_l || i_k < 0 || i_l > m_external_nodes.size()) {
+    if (!m_root || i_k >= i_l || i_k < 0 || i_l >= m_external_nodes.size()) {
         return static_cast<double>(NAN);
     }
 

@@ -35,6 +35,14 @@ class dp_array {
     ~dp_array();
 
     /**
+     * \brief Cost of edge (i_k, i_k + 1).
+     *
+     * \param[in] i_k Head index of the edge.
+     * \return cost of edge (i_k, i_k+1). NaN (Not-A-Number) if input i_k is not valid.
+     */
+    double edge_cost(int i_k) const;
+
+    /**
      * \brief Update costs of all edges in the (sub-)path (i_k, tail) by a constant w.
      *
      * \param[in] i_k Index of the head vertex of the (sub-)path.
