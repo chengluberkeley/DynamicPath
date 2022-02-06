@@ -16,13 +16,26 @@ dp_array<VType>::dp_array(const std::vector<VType>& input) {
         return;
     }
 
-    // TODO: Improve allocator to speed up.
+    // Compute re-balance interval.
+    std::size_t reBalanceInterval = 1000;
+    if (input.size() / 10 < reBalanceInterval) {
+        reBalanceInterval = input.size() / 10;
+    }
+
     m_external_nodes.push_back(m_dp_ops.gen_new_node(true, 0));
     m_root = m_external_nodes[0];
-    for (std::size_t i = 0; i < input.size(); ++i) {
+    bool reBalance = false;
+    for (std::size_t i = 0; i < input.size() - 1; ++i) {
         m_external_nodes.push_back(m_dp_ops.gen_new_node(true, static_cast<int>(i + 1)));
-        m_root = m_dp_ops.concatenate(m_root, m_external_nodes[i + 1], input[i]);
+        if (i % reBalanceInterval == 0) {
+            reBalance = true;
+        } else {
+            reBalance = false;
+        }
+        m_root = m_dp_ops.concatenate(m_root, m_external_nodes[i + 1], input[i], reBalance);
     }
+    m_external_nodes.push_back(m_dp_ops.gen_new_node(true, static_cast<int>(input.size())));
+    m_root = m_dp_ops.concatenate(m_root, m_external_nodes[input.size()], input[input.size() - 1]);
 }
 
 template <typename VType>

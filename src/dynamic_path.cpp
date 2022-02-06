@@ -309,7 +309,7 @@ void dynamic_path_ops<VType>::pupdate(TreeNode<VType>* p, VType x) const {
 }
 
 template <typename VType>
-TreeNode<VType>* dynamic_path_ops<VType>::concatenate(TreeNode<VType>* p, TreeNode<VType>* q, VType x) const {
+TreeNode<VType>* dynamic_path_ops<VType>::concatenate(TreeNode<VType>* p, TreeNode<VType>* q, VType x, bool reBalance) const {
     if (p == nullptr) {
         return q;
     } else if (q == nullptr) {
@@ -317,7 +317,9 @@ TreeNode<VType>* dynamic_path_ops<VType>::concatenate(TreeNode<VType>* p, TreeNo
     }
 
     TreeNode<VType>* root = construct_(p, q, x);
-    root = top_down_balance_(root);
+    if (reBalance) {
+        root = top_down_balance_(root);
+    }
     return root;
 }
 

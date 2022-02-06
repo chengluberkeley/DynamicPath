@@ -137,7 +137,7 @@ class dynamic_path_ops {
      * \param[in] x Cost of edge (tail(p), head(q)).
      * \return Root TreeNode of the concatenated new path. If q is nullptr, returns p; if p is nullptr, returns q.
      */
-    TreeNode<VType>* concatenate(TreeNode<VType>* p, TreeNode<VType>* q, VType x) const;
+    TreeNode<VType>* concatenate(TreeNode<VType>* p, TreeNode<VType>* q, VType x, bool reBalance = true) const;
 
     /**
      * \brief Split `path(v)` into (up to) two parts by deleting the edge (before(v), v).
