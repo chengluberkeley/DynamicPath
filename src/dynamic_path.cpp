@@ -8,22 +8,23 @@ Implementation of the functions in dynamic_path.h
 
 #include <cassert>
 #include <cmath>
-#include <iostream>
 #include <utility>
 
-static bool close_to_zero(double x) {
+template <typename VType>
+static bool close_to_zero(VType x) {
     return fabs(x) < 1e-6;
 }
 
 #pragma mark Public functions
 
-TreeNode* dynamic_path_ops::gen_new_node(bool is_external, int node_index) const {
-    TreeNode* p = new TreeNode();
+template <typename VType>
+TreeNode<VType>* dynamic_path_ops<VType>::gen_new_node(bool is_external, int node_index) const {
+    TreeNode<VType>* p = new TreeNode<VType>();
     p->external = is_external;
     p->node_index = node_index;
     p->bparent = nullptr;
-    p->netmin = 0;
-    p->netcost = 0;
+    p->netmin = VType(0);
+    p->netcost = VType(0);
     p->bhead = nullptr;
     p->bleft = nullptr;
     p->bright = nullptr;
@@ -32,7 +33,8 @@ TreeNode* dynamic_path_ops::gen_new_node(bool is_external, int node_index) const
     return p;
 }
 
-TreeNode* dynamic_path_ops::path(TreeNode* v) const {
+template <typename VType>
+TreeNode<VType>* dynamic_path_ops<VType>::path(TreeNode<VType>* v) const {
     if (!v) {
         return nullptr;
     }
@@ -44,7 +46,8 @@ TreeNode* dynamic_path_ops::path(TreeNode* v) const {
     return v;
 }
 
-TreeNode* dynamic_path_ops::head(TreeNode* p) const {
+template <typename VType>
+TreeNode<VType>* dynamic_path_ops<VType>::head(TreeNode<VType>* p) const {
     if (!p) {
         return nullptr;
     }
@@ -59,7 +62,8 @@ TreeNode* dynamic_path_ops::head(TreeNode* p) const {
     return p->bhead;
 }
 
-TreeNode* dynamic_path_ops::tail(TreeNode* p) const {
+template <typename VType>
+TreeNode<VType>* dynamic_path_ops<VType>::tail(TreeNode<VType>* p) const {
     if (!p) {
         return nullptr;
     }
@@ -74,7 +78,8 @@ TreeNode* dynamic_path_ops::tail(TreeNode* p) const {
     return p->btail;
 }
 
-TreeNode* dynamic_path_ops::before(TreeNode* v) const {
+template <typename VType>
+TreeNode<VType>* dynamic_path_ops<VType>::before(TreeNode<VType>* v) const {
     if (!v) {
         return nullptr;
     }
@@ -82,9 +87,9 @@ TreeNode* dynamic_path_ops::before(TreeNode* v) const {
     // Must be an external vertex node.
     assert(v->external);
 
-    TreeNode* w = v;
-    TreeNode* w_parent = w->bparent;
-    TreeNode* u = nullptr;
+    TreeNode<VType>* w = v;
+    TreeNode<VType>* w_parent = w->bparent;
+    TreeNode<VType>* u = nullptr;
     while (w_parent != nullptr) {
         if (w == w_parent->bright) {
             u = w_parent->bleft;
@@ -105,7 +110,8 @@ TreeNode* dynamic_path_ops::before(TreeNode* v) const {
     return u->btail;
 }
 
-TreeNode* dynamic_path_ops::after(TreeNode* v) const {
+template <typename VType>
+TreeNode<VType>* dynamic_path_ops<VType>::after(TreeNode<VType>* v) const {
     if (!v) {
         return nullptr;
     }
@@ -113,9 +119,9 @@ TreeNode* dynamic_path_ops::after(TreeNode* v) const {
     // Must be an external vertex node.
     assert(v->external);
 
-    TreeNode* w = v;
-    TreeNode* w_parent = w->bparent;
-    TreeNode* u = nullptr;
+    TreeNode<VType>* w = v;
+    TreeNode<VType>* w_parent = w->bparent;
+    TreeNode<VType>* u = nullptr;
     while (w_parent != nullptr) {
         if (w == w_parent->bleft) {
             u = w_parent->bright;
@@ -136,19 +142,20 @@ TreeNode* dynamic_path_ops::after(TreeNode* v) const {
     return u->bhead;
 }
 
-double dynamic_path_ops::pcost_before(TreeNode* v) const {
+template <typename VType>
+VType dynamic_path_ops<VType>::pcost_before(TreeNode<VType>* v) const {
     if (!v) {
-        return static_cast<double>(NAN);
+        return static_cast<VType>(NAN);
     }
 
     // Must be an external vertex node.
     assert(v->external);
 
     // Check if v is the head of path(v)
-    if (v == head(path(v))) return static_cast<double>(NAN);
+    if (v == head(path(v))) return static_cast<VType>(NAN);
 
     // Back up the nodes
-    std::vector<TreeNode*> backup_nodes;
+    std::vector<TreeNode<VType>*> backup_nodes;
     backup_nodes.push_back(v);
     v = v->bparent;
     while (v != nullptr) {
@@ -157,7 +164,7 @@ double dynamic_path_ops::pcost_before(TreeNode* v) const {
     }
 
     // Compute grossmin values
-    std::vector<double> grossmin(backup_nodes.size(), 0);
+    std::vector<VType> grossmin(backup_nodes.size(), 0);
     // Root node
     grossmin[grossmin.size() - 1] = backup_nodes[backup_nodes.size() - 1]->netmin;
     for (int i = static_cast<int>(grossmin.size()) - 2; i >= 1; --i) {
@@ -174,22 +181,23 @@ double dynamic_path_ops::pcost_before(TreeNode* v) const {
 
     // Should not reach this step.
     assert(false);
-    return static_cast<double>(NAN);
+    return static_cast<VType>(NAN);
 }
 
-double dynamic_path_ops::pcost_after(TreeNode* v) const {
+template <typename VType>
+VType dynamic_path_ops<VType>::pcost_after(TreeNode<VType>* v) const {
     if (!v) {
-        return static_cast<double>(NAN);
+        return static_cast<VType>(NAN);
     }
 
     // Must be an external vertex node.
     assert(v->external);
 
     // Check if v is the tail of path(v)
-    if (v == tail(path(v))) return static_cast<double>(NAN);
+    if (v == tail(path(v))) return static_cast<VType>(NAN);
 
     // Back up the nodes
-    std::vector<TreeNode*> backup_nodes;
+    std::vector<TreeNode<VType>*> backup_nodes;
     backup_nodes.push_back(v);
     v = v->bparent;
     while (v != nullptr) {
@@ -198,7 +206,7 @@ double dynamic_path_ops::pcost_after(TreeNode* v) const {
     }
 
     // Compute grossmin values
-    std::vector<double> grossmin(backup_nodes.size(), 0);
+    std::vector<VType> grossmin(backup_nodes.size(), 0);
     // Root node
     grossmin[grossmin.size() - 1] = backup_nodes[backup_nodes.size() - 1]->netmin;
     for (int i = static_cast<int>(grossmin.size()) - 2; i >= 1; --i) {
@@ -215,10 +223,11 @@ double dynamic_path_ops::pcost_after(TreeNode* v) const {
 
     // Should not reach this step.
     assert(false);
-    return static_cast<double>(NAN);
+    return static_cast<VType>(NAN);
 }
 
-static bool pmincost_condition_before(TreeNode* u) {
+template <typename VType>
+static bool pmincost_condition_before(TreeNode<VType>* u) {
     if (!close_to_zero(u->netcost)) return false;
     if ((u->bleft->external) || (u->bleft->netmin > 0)) {
         return true;
@@ -227,13 +236,14 @@ static bool pmincost_condition_before(TreeNode* u) {
     }
 }
 
-TreeNode* dynamic_path_ops::pmincost_before(TreeNode* p) const {
+template <typename VType>
+TreeNode<VType>* dynamic_path_ops<VType>::pmincost_before(TreeNode<VType>* p) const {
     if (!p || p->external) return nullptr;
 
     // Must be a root node.
     assert(!p->bparent);
 
-    TreeNode* u = p;
+    TreeNode<VType>* u = p;
     while (!pmincost_condition_before(u)) {
         if ((!u->bleft->external) && (close_to_zero(u->bleft->netmin))) {
             u = u->bleft;
@@ -250,7 +260,8 @@ TreeNode* dynamic_path_ops::pmincost_before(TreeNode* p) const {
     }
 }
 
-static bool pmincost_condition_after(TreeNode* u) {
+template <typename VType>
+static bool pmincost_condition_after(TreeNode<VType>* u) {
     if (!close_to_zero(u->netcost)) return false;
     if ((u->bright->external) || (u->bright->netmin > 0)) {
         return true;
@@ -259,13 +270,14 @@ static bool pmincost_condition_after(TreeNode* u) {
     }
 }
 
-TreeNode* dynamic_path_ops::pmincost_after(TreeNode* p) const {
+template <typename VType>
+TreeNode<VType>* dynamic_path_ops<VType>::pmincost_after(TreeNode<VType>* p) const {
     if (!p || p->external) return nullptr;
 
     // Must be a root node.
     assert(!p->bparent);
 
-    TreeNode* u = p;
+    TreeNode<VType>* u = p;
     while (!pmincost_condition_after(u)) {
         if ((!u->bright->external) && (close_to_zero(u->bright->netmin))) {
             u = u->bright;
@@ -282,7 +294,8 @@ TreeNode* dynamic_path_ops::pmincost_after(TreeNode* p) const {
     }
 }
 
-void dynamic_path_ops::pupdate(TreeNode* p, double x) const {
+template <typename VType>
+void dynamic_path_ops<VType>::pupdate(TreeNode<VType>* p, VType x) const {
     if (!p) {
         return;
     }
@@ -295,19 +308,21 @@ void dynamic_path_ops::pupdate(TreeNode* p, double x) const {
     p->netmin = p->netmin + x;
 }
 
-TreeNode* dynamic_path_ops::concatenate(TreeNode* p, TreeNode* q, double x) const {
+template <typename VType>
+TreeNode<VType>* dynamic_path_ops<VType>::concatenate(TreeNode<VType>* p, TreeNode<VType>* q, VType x) const {
     if (p == nullptr) {
         return q;
     } else if (q == nullptr) {
         return p;
     }
 
-    TreeNode* root = construct_(p, q, x);
+    TreeNode<VType>* root = construct_(p, q, x);
     root = top_down_balance_(root);
     return root;
 }
 
-void dynamic_path_ops::split_before(TreeNode* v, TreeNode*& p, TreeNode*& q, double& x) const {
+template <typename VType>
+void dynamic_path_ops<VType>::split_before(TreeNode<VType>* v, TreeNode<VType>*& p, TreeNode<VType>*& q, VType& x) const {
     if (!v) {
         return;
     }
@@ -319,13 +334,13 @@ void dynamic_path_ops::split_before(TreeNode* v, TreeNode*& p, TreeNode*& q, dou
     if (v == head(path(v))) {
         p = nullptr;
         q = path(v);
-        x = static_cast<double>(NAN);
+        x = static_cast<VType>(NAN);
         return;
     }
 
     // Find the edge [before(v), v]
     // Back up the nodes
-    std::vector<TreeNode*> backup_nodes;
+    std::vector<TreeNode<VType>*> backup_nodes;
     backup_nodes.push_back(v);
     v = v->bparent;
     while (v != nullptr) {
@@ -349,14 +364,14 @@ void dynamic_path_ops::split_before(TreeNode* v, TreeNode*& p, TreeNode*& q, dou
     p = nullptr;
     q = nullptr;
 
-    std::vector<TreeNode*> p_list;
-    std::vector<double> p_cost_list;
-    std::vector<TreeNode*> q_list;
-    std::vector<double> q_cost_list;
+    std::vector<TreeNode<VType>*> p_list;
+    std::vector<VType> p_cost_list;
+    std::vector<TreeNode<VType>*> q_list;
+    std::vector<VType> q_cost_list;
 
-    TreeNode* temp_v;
-    TreeNode* temp_w;
-    double temp_x;
+    TreeNode<VType>* temp_v;
+    TreeNode<VType>* temp_w;
+    VType temp_x;
     // From root to the parent of the edge
     for (int i = static_cast<int>(backup_nodes.size()) - 1; i >= edge_index + 1; --i) {
         if (backup_nodes[i]->bleft == backup_nodes[i - 1]) {
@@ -391,7 +406,8 @@ void dynamic_path_ops::split_before(TreeNode* v, TreeNode*& p, TreeNode*& q, dou
     }
 }
 
-void dynamic_path_ops::split_after(TreeNode* v, TreeNode*& p, TreeNode*& q, double& y) const {
+template <typename VType>
+void dynamic_path_ops<VType>::split_after(TreeNode<VType>* v, TreeNode<VType>*& p, TreeNode<VType>*& q, VType& y) const {
     if (!v) {
         return;
     }
@@ -403,13 +419,13 @@ void dynamic_path_ops::split_after(TreeNode* v, TreeNode*& p, TreeNode*& q, doub
     if (v == tail(path(v))) {
         p = path(v);
         q = nullptr;
-        y = static_cast<double>(NAN);
+        y = static_cast<VType>(NAN);
         return;
     }
 
     // Find the edge [v, after(v)]
     // Back up the nodes
-    std::vector<TreeNode*> backup_nodes;
+    std::vector<TreeNode<VType>*> backup_nodes;
     backup_nodes.push_back(v);
     v = v->bparent;
     while (v != nullptr) {
@@ -433,14 +449,14 @@ void dynamic_path_ops::split_after(TreeNode* v, TreeNode*& p, TreeNode*& q, doub
     p = nullptr;
     q = nullptr;
 
-    std::vector<TreeNode*> p_list;
-    std::vector<double> p_cost_list;
-    std::vector<TreeNode*> q_list;
-    std::vector<double> q_cost_list;
+    std::vector<TreeNode<VType>*> p_list;
+    std::vector<VType> p_cost_list;
+    std::vector<TreeNode<VType>*> q_list;
+    std::vector<VType> q_cost_list;
 
-    TreeNode* temp_v;
-    TreeNode* temp_w;
-    double temp_y;
+    TreeNode<VType>* temp_v;
+    TreeNode<VType>* temp_w;
+    VType temp_y;
     // From root to the parent of the edge
     for (int i = static_cast<int>(backup_nodes.size()) - 1; i >= edge_index + 1; --i) {
         if (backup_nodes[i]->bleft == backup_nodes[i - 1]) {
@@ -475,25 +491,28 @@ void dynamic_path_ops::split_after(TreeNode* v, TreeNode*& p, TreeNode*& q, doub
     }
 }
 
-static void vectorize_internal(TreeNode* p, double basemin, std::vector<double>& vector_path) {
+template <typename VType>
+static void vectorize_internal(TreeNode<VType>* p, VType basemin, std::vector<VType>& vector_path) {
     if (!p || (p->external)) return;
     vectorize_internal(p->bleft, p->netmin + basemin, vector_path);
-    double grossmin = p->netmin + basemin;
+    VType grossmin = p->netmin + basemin;
     vector_path.push_back(p->netcost + grossmin);
     vectorize_internal(p->bright, p->netmin + basemin, vector_path);
 }
 
-void dynamic_path_ops::vectorize(TreeNode* p, std::vector<double>& vector_path) const {
+template <typename VType>
+void dynamic_path_ops<VType>::vectorize(TreeNode<VType>* p, std::vector<VType>& vector_path) const {
     if (!p) {
         return;
     }
 
     vector_path.clear();
 
-    vectorize_internal(p, 0, vector_path);
+    vectorize_internal(p, VType(0), vector_path);
 }
 
-static void vectorize_internal(TreeNode* p, std::vector<int>& vector_vertices) {
+template <typename VType>
+static void vectorize_internal(TreeNode<VType>* p, std::vector<int>& vector_vertices) {
     if (!p) return;
 
     if (p->external) {
@@ -505,7 +524,8 @@ static void vectorize_internal(TreeNode* p, std::vector<int>& vector_vertices) {
     vectorize_internal(p->bright, vector_vertices);
 }
 
-void dynamic_path_ops::vectorize(TreeNode* p, std::vector<int> &vector_vertices) const {
+template <typename VType>
+void dynamic_path_ops<VType>::vectorizeVertex(TreeNode<VType>* p, std::vector<int>& vector_vertices) const {
     if (!p) {
         return;
     }
@@ -515,7 +535,8 @@ void dynamic_path_ops::vectorize(TreeNode* p, std::vector<int> &vector_vertices)
     vectorize_internal(p, vector_vertices);
 }
 
-void dynamic_path_ops::clearall(TreeNode* p) const {
+template <typename VType>
+void dynamic_path_ops<VType>::clearall(TreeNode<VType>* p) const {
     if (!p) return;
 
     if (p->bleft) {
@@ -531,12 +552,13 @@ void dynamic_path_ops::clearall(TreeNode* p) const {
 
 #pragma mark Private functions
 
-TreeNode* dynamic_path_ops::construct_(TreeNode* v, TreeNode* w, double x) const {
+template <typename VType>
+TreeNode<VType>* dynamic_path_ops<VType>::construct_(TreeNode<VType>* v, TreeNode<VType>* w, VType x) const {
     if (!v || !w) return nullptr;
 
-    TreeNode* root = gen_new_node(false, 0);
+    TreeNode<VType>* root = gen_new_node(false, 0);
     // Compute grossmin
-    double gross_min = x;
+    VType gross_min = x;
     if (!v->external) {
         if (v->netmin < gross_min)
             gross_min = v->netmin;
@@ -581,7 +603,8 @@ TreeNode* dynamic_path_ops::construct_(TreeNode* v, TreeNode* w, double x) const
     return root;
 }
 
-void dynamic_path_ops::destroy_(TreeNode* root, TreeNode*& v, TreeNode*& w, double& x) const {
+template <typename VType>
+void dynamic_path_ops<VType>::destroy_(TreeNode<VType>* root, TreeNode<VType>*& v, TreeNode<VType>*& w, VType& x) const {
     if (!root || (root->external)) return;
 
     v = root->bleft;
@@ -604,7 +627,8 @@ void dynamic_path_ops::destroy_(TreeNode* root, TreeNode*& v, TreeNode*& w, doub
     delete root;
 }
 
-TreeNode* dynamic_path_ops::rotateleft_(TreeNode* root) const {
+template <typename VType>
+TreeNode<VType>* dynamic_path_ops<VType>::rotateleft_(TreeNode<VType>* root) const {
     if (!root) return nullptr;
 
     // Make sure the root has an internal right child
@@ -612,16 +636,16 @@ TreeNode* dynamic_path_ops::rotateleft_(TreeNode* root) const {
         return nullptr;
     }
 
-    TreeNode* new_root = root->bright;
+    TreeNode<VType>* new_root = root->bright;
 
     // Update the fields
     // Change the shape
     // Update the bleft and bright fields
     root->bright = new_root->bleft;
     new_root->bleft = root;
-    TreeNode* p = root->bleft;
-    TreeNode* q = root->bright;
-    TreeNode* r = new_root->bright;
+    TreeNode<VType>* p = root->bleft;
+    TreeNode<VType>* q = root->bright;
+    TreeNode<VType>* r = new_root->bright;
 
     // bparent
     root->bparent = new_root;
@@ -630,15 +654,15 @@ TreeNode* dynamic_path_ops::rotateleft_(TreeNode* root) const {
 
     // netmin and netcost
     // compute old grosscost and grossmin
-    double root_grossmin = root->netmin;  // Note: If not root, we assume caller already temporarily updates the netmin to grossmin.
-    double root_grosscost = root->netcost + root_grossmin;
-    double new_root_grossmin = root_grossmin + new_root->netmin;
-    double new_root_grosscost = new_root->netcost + new_root_grossmin;
-    double p_grossmin = root_grossmin + p->netmin;
-    double q_grossmin = new_root_grossmin + q->netmin;
-    double r_grossmin = new_root_grossmin + r->netmin;
+    VType root_grossmin = root->netmin;  // Note: If not root, we assume caller already temporarily updates the netmin to grossmin.
+    VType root_grosscost = root->netcost + root_grossmin;
+    VType new_root_grossmin = root_grossmin + new_root->netmin;
+    VType new_root_grosscost = new_root->netcost + new_root_grossmin;
+    VType p_grossmin = root_grossmin + p->netmin;
+    VType q_grossmin = new_root_grossmin + q->netmin;
+    VType r_grossmin = new_root_grossmin + r->netmin;
     // Compute new grosscost and grossmin
-    double root_grossmin_new = root_grosscost;
+    VType root_grossmin_new = root_grosscost;
     if (!p->external) {
         if (p_grossmin < root_grossmin_new) {
             root_grossmin_new = p_grossmin;
@@ -651,7 +675,7 @@ TreeNode* dynamic_path_ops::rotateleft_(TreeNode* root) const {
         }
     }
 
-    double new_root_grossmin_new = new_root_grossmin;
+    VType new_root_grossmin_new = new_root_grossmin;
     if (root_grossmin_new < new_root_grossmin_new) {
         new_root_grossmin_new = root_grossmin_new;
     }
@@ -686,7 +710,8 @@ TreeNode* dynamic_path_ops::rotateleft_(TreeNode* root) const {
     return new_root;
 }
 
-TreeNode* dynamic_path_ops::rotateright_(TreeNode* root) const {
+template <typename VType>
+TreeNode<VType>* dynamic_path_ops<VType>::rotateright_(TreeNode<VType>* root) const {
     if (!root) return nullptr;
 
     // Make sure the root has an internal left child
@@ -694,16 +719,16 @@ TreeNode* dynamic_path_ops::rotateright_(TreeNode* root) const {
         return nullptr;
     }
 
-    TreeNode* new_root = root->bleft;
+    TreeNode<VType>* new_root = root->bleft;
 
     // Update the fields
     // Change the shape
     // Update the bleft and bright fields
     root->bleft = new_root->bright;
     new_root->bright = root;
-    TreeNode* p = new_root->bleft;
-    TreeNode* q = root->bleft;
-    TreeNode* r = root->bright;
+    TreeNode<VType>* p = new_root->bleft;
+    TreeNode<VType>* q = root->bleft;
+    TreeNode<VType>* r = root->bright;
 
     // bparent
     root->bparent = new_root;
@@ -712,15 +737,15 @@ TreeNode* dynamic_path_ops::rotateright_(TreeNode* root) const {
 
     // netmin and netcost
     // compute old grosscost and grossmin
-    double root_grossmin = root->netmin;  // Assumption ditto as `rotateleft_`.
-    double root_grosscost = root->netcost + root_grossmin;
-    double new_root_grossmin = root_grossmin + new_root->netmin;
-    double new_root_grosscost = new_root->netcost + new_root_grossmin;
-    double p_grossmin = new_root_grossmin + p->netmin;
-    double q_grossmin = new_root_grossmin + q->netmin;
-    double r_grossmin = root_grossmin + r->netmin;
+    VType root_grossmin = root->netmin;  // Assumption ditto as `rotateleft_`.
+    VType root_grosscost = root->netcost + root_grossmin;
+    VType new_root_grossmin = root_grossmin + new_root->netmin;
+    VType new_root_grosscost = new_root->netcost + new_root_grossmin;
+    VType p_grossmin = new_root_grossmin + p->netmin;
+    VType q_grossmin = new_root_grossmin + q->netmin;
+    VType r_grossmin = root_grossmin + r->netmin;
     // Compute new grosscost and grossmin
-    double root_grossmin_new = root_grosscost;
+    VType root_grossmin_new = root_grosscost;
     if (!q->external) {
         if (q_grossmin < root_grossmin_new) {
             root_grossmin_new = q_grossmin;
@@ -733,7 +758,7 @@ TreeNode* dynamic_path_ops::rotateright_(TreeNode* root) const {
         }
     }
 
-    double new_root_grossmin_new = new_root_grossmin;
+    VType new_root_grossmin_new = new_root_grossmin;
     if (root_grossmin_new < new_root_grossmin_new) {
         new_root_grossmin_new = root_grossmin_new;
     }
@@ -768,13 +793,14 @@ TreeNode* dynamic_path_ops::rotateright_(TreeNode* root) const {
     return new_root;
 }
 
-TreeNode* dynamic_path_ops::top_down_balance_(TreeNode* root) const {
+template <typename VType>
+TreeNode<VType>* dynamic_path_ops<VType>::top_down_balance_(TreeNode<VType>* root) const {
     if (!root || root->external) {
         return root;
     }
 
-    TreeNode* p = root->bleft;
-    TreeNode* q = root->bright;
+    TreeNode<VType>* p = root->bleft;
+    TreeNode<VType>* q = root->bright;
 
     // Exit rule
     if (abs(p->height - q->height) <= 1) {
@@ -827,3 +853,10 @@ TreeNode* dynamic_path_ops::top_down_balance_(TreeNode* root) const {
 
     return root;
 }
+
+#pragma mark Instantiations
+
+template class dynamic_path_ops<double>;
+template class dynamic_path_ops<float>;
+template class dynamic_path_ops<uint32_t>;
+template class dynamic_path_ops<int>;

@@ -13,9 +13,10 @@
 #include <string>
 #include <vector>
 
-bool vertex_inorder(const dynamic_path_ops& tree_ops, TreeNode* root, const std::vector<int>& reference) {
+template <typename VType>
+bool vertex_inorder(const dynamic_path_ops<VType>& tree_ops, TreeNode<VType>* root, const std::vector<int>& reference) {
     std::vector<int> vector_vertices;
-    tree_ops.vectorize(root, vector_vertices);
+    tree_ops.vectorizeVertex(root, vector_vertices);
     if (vector_vertices.size() != reference.size()) {
         return false;
     }
@@ -27,8 +28,9 @@ bool vertex_inorder(const dynamic_path_ops& tree_ops, TreeNode* root, const std:
     return true;
 }
 
-bool cost_inorder(const dynamic_path_ops& tree_ops, TreeNode* root, const std::vector<double>& reference) {
-    std::vector<double> vector_path;
+template <typename VType>
+bool cost_inorder(const dynamic_path_ops<VType>& tree_ops, TreeNode<VType>* root, const std::vector<VType>& reference) {
+    std::vector<VType> vector_path;
     tree_ops.vectorize(root, vector_path);
     if (vector_path.size() != reference.size()) {
         return false;
@@ -41,14 +43,15 @@ bool cost_inorder(const dynamic_path_ops& tree_ops, TreeNode* root, const std::v
     return true;
 }
 
-void subpathAllCorrect(const dynamic_path_ops& tree_ops, TreeNode*& root, const std::vector<TreeNode*>& external_nodes,
-                       const std::vector<double>& cost_reference, const std::vector<int>& index_reference) {
+template <typename VType>
+void subpathAllCorrect(const dynamic_path_ops<VType>& tree_ops, TreeNode<VType>*& root, const std::vector<TreeNode<VType>*>& external_nodes,
+                       const std::vector<VType>& cost_reference, const std::vector<int>& index_reference) {
     assert(external_nodes.size() == index_reference.size());
     assert(external_nodes.size() == cost_reference.size() + 1);
-    TreeNode* p;
-    TreeNode* q;
-    TreeNode* r;
-    double cost, cost2;
+    TreeNode<VType>* p;
+    TreeNode<VType>* q;
+    TreeNode<VType>* r;
+    VType cost, cost2;
     // Edge case: Singleton vertex
     for (std::size_t i = 0; i < index_reference.size(); ++i) {
         tree_ops.split_before(external_nodes[i], p, q, cost);
@@ -64,7 +67,7 @@ void subpathAllCorrect(const dynamic_path_ops& tree_ops, TreeNode*& root, const 
     // Check minimum matches for each segment.
     for (std::size_t st = 0; st < index_reference.size() - 1; ++st) {
         for (std::size_t ed = st + 1; ed < index_reference.size(); ++ed) {
-            double local_min = cost_reference[st];
+            VType local_min = cost_reference[st];
             for (std::size_t i = st + 1; i < ed; ++i) {
                 local_min = std::min(local_min, cost_reference[i]);
             }
@@ -81,14 +84,14 @@ void subpathAllCorrect(const dynamic_path_ops& tree_ops, TreeNode*& root, const 
 }
 
 void dynamic_path_unit_tests() {
-    dynamic_path_ops tree_ops;
+    dynamic_path_ops<double> tree_ops;
     // 20 edges with costs {0, 1, 2, ..., 19}
     std::size_t edge_num = 20;
     std::vector<double> original_array(edge_num, 0);
     std::vector<int> original_index_array(edge_num + 1, 0);
-    TreeNode* root = tree_ops.gen_new_node(true, 0);
-    TreeNode* p;
-    std::vector<TreeNode*> external_nodes(edge_num + 1);
+    TreeNode<double>* root = tree_ops.gen_new_node(true, 0);
+    TreeNode<double>* p;
+    std::vector<TreeNode<double>*> external_nodes(edge_num + 1);
     external_nodes[0] = root;
     for (std::size_t i = 0; i < edge_num; ++i) {
         original_array[i] = i;
@@ -146,7 +149,7 @@ void dynamic_path_unit_tests() {
     p = tree_ops.pmincost_after(root);
     assert(p->external && p->node_index == 0);
 
-    TreeNode* q;
+    TreeNode<double>* q;
     double cost;
     // split_before + concatenate
     tree_ops.split_before(external_nodes[0], p, q, cost);
@@ -197,7 +200,7 @@ void dynamic_path_unit_tests() {
     for (std::size_t i = 0; i < 15; ++i) {
         original_array[i] += 5;
     }
-    TreeNode* r;
+    TreeNode<double>* r;
     double cost2;
     tree_ops.split_before(external_nodes[0], p, q, cost);
     tree_ops.split_after(external_nodes[15], q, r, cost2);
@@ -252,7 +255,7 @@ void dynamic_path_unit_tests() {
 
     tree_ops.split_before(external_nodes[6], p, q, cost);
     tree_ops.split_after(external_nodes[12], q, r, cost2);
-    TreeNode* tmp = tree_ops.pmincost_before(q);
+    TreeNode<double>* tmp = tree_ops.pmincost_before(q);
     assert(tmp->external && tmp->node_index == 7);
     assert(same_cost == tree_ops.pcost_before(tmp));
     tmp = tree_ops.pmincost_after(q);
@@ -267,12 +270,13 @@ void dynamic_path_unit_tests() {
     std::cout << "All unit tests of dynamic_path_ops passed!\n";
 }
 
-static bool operator == (const dp_array& dynamic_array, const std::vector<double>& reference) {
+template <typename VType>
+static bool operator == (const dp_array<VType>& dynamic_array, const std::vector<VType>& reference) {
     if (dynamic_array.edge_num() != reference.size()) {
         return false;
     }
 
-    std::vector<double> output;
+    std::vector<VType> output;
     if (!dynamic_array.vectorize(output)) {
         return false;
     }
@@ -294,15 +298,16 @@ static bool operator == (const dp_array& dynamic_array, const std::vector<double
     return true;
 }
 
-void subpathAllCorrect(dp_array& dynamic_path, const std::vector<double>& reference) {
+template <typename VType>
+void subpathAllCorrect(dp_array<VType>& dynamic_path, const std::vector<VType>& reference) {
     assert(dynamic_path.edge_num() == reference.size());
 
     // Check minimum matches for each segment.
     for (int st = 0; st < reference.size() - 1; ++st) {
         for (int ed = st + 1; ed < reference.size(); ++ed) {
-            double local_min_before = reference[st];
+            VType local_min_before = reference[st];
             int local_min_index_before = static_cast<int>(st);
-            double local_min_after = local_min_before;
+            VType local_min_after = local_min_before;
             int local_min_index_after = local_min_index_before;
             for (int i = st + 1; i < ed; ++i) {
                 if (reference[i] < local_min_before) {
@@ -332,7 +337,7 @@ void dp_array_unit_tests() {
         original_array[i] = i;
     }
 
-    dp_array dynamic_array(original_array);
+    dp_array<double> dynamic_array(original_array);
     assert(dynamic_array.edge_num() == edge_num);
     assert(dynamic_array.vertex_num() == edge_num + 1);
     assert(dynamic_array == original_array);
@@ -377,7 +382,7 @@ void dp_array_unit_tests() {
     for (std::size_t i = 6; i < 12; ++i) {
         original_array[i] = same_cost;
     }
-    dp_array dynamic_array2(original_array);
+    dp_array<double> dynamic_array2(original_array);
     subpathAllCorrect(dynamic_array2, original_array);
 
     std::cout << "All unit tests of dp_array passed!\n";
@@ -396,7 +401,7 @@ void time_benchmarking() {
     std::cout << "Random array generation complete ... \n";
 
     auto start = std::chrono::steady_clock::now();
-    dp_array dynamic_array(original_array);
+    dp_array<double> dynamic_array(original_array);
     auto end = std::chrono::steady_clock::now();
     std::cout << "Initialize the corresponding dynamic path in time "
         << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()

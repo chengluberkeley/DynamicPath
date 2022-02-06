@@ -19,6 +19,7 @@ Date Created: Oct. 27, 2016.
  *
  * \note This is just one exemplary implementation of a concrete dynamic path class to illustrate the use of the operations.
  */
+template <typename VType>
 class dp_array {
   public:
     /**
@@ -27,7 +28,7 @@ class dp_array {
      *
      * \param[in] input Raw input vector to initialize the dynamic path data structure from.
      */
-    dp_array(const std::vector<double>& input);
+    dp_array(const std::vector<VType>& input);
 
     /**
      * \brief Destructor to release all memory.
@@ -40,7 +41,7 @@ class dp_array {
      * \param[in] i_k Head index of the edge.
      * \return cost of edge (i_k, i_k+1). NaN (Not-A-Number) if input i_k is not valid.
      */
-    double edge_cost(int i_k) const;
+    VType edge_cost(int i_k) const;
 
     /**
      * \brief Update costs of all edges in the (sub-)path (i_k, tail) by a constant w.
@@ -48,7 +49,7 @@ class dp_array {
      * \param[in] i_k Index of the head vertex of the (sub-)path.
      * \param[in] w Constant (no restriction in sign) to be added to every edge of the (sub-)path.
      */
-    void update_constant(int i_k, double w);
+    void update_constant(int i_k, VType w);
 
     /**
      * \brief Update costs of all edges in the (sub-)path (i_k, i_l) by a constant w.
@@ -57,7 +58,7 @@ class dp_array {
      * \param[in] i_l Index of the tail vertex of the (sub-)path.
      * \param[in] w Constant (no restriction in sign) to be added to every edge of the (sub-)path.
      */
-    void update_constant(int i_k, int i_l, double w);
+    void update_constant(int i_k, int i_l, VType w);
 
     /**
      * \brief Get the minimum edge cost of all edges in the (sub-)path (i_k, tail),
@@ -69,7 +70,7 @@ class dp_array {
      * \return Minimum edge cost of all edges in the (sub-)path (i_k, tail).
      * NaN (Not-A-Number) if input i_k is not valid.
      */
-    double min_cost_first(int i_k, int& min_index);
+    VType min_cost_first(int i_k, int& min_index);
 
     /**
      * \brief Get the minimum edge cost of all edges in the (sub-)path (i_k, i_l),
@@ -82,7 +83,7 @@ class dp_array {
      * \return Minimum edge cost of all edges in the (sub-)path (i_k, i_l).
      * NaN (Not-A-Number) if input (sub-)path (i_k, i_l) is not valid.
      */
-    double min_cost_first(int i_k, int i_l, int& min_index);
+    VType min_cost_first(int i_k, int i_l, int& min_index);
 
     /**
      * \brief Get the minimum edge cost of all edges in the (sub-)path (i_k, tail),
@@ -94,7 +95,7 @@ class dp_array {
      * \return Minimum edge cost of all edges in the (sub-)path (i_k, tail).
      * NaN (Not-A-Number) if input i_k is not valid.
      */
-    double min_cost_last(int i_k, int& min_index);
+    VType min_cost_last(int i_k, int& min_index);
 
     /**
      * \brief Get the minimum edge cost of all edges in the (sub-)path (i_k, i_l),
@@ -107,7 +108,7 @@ class dp_array {
      * \return Minimum edge cost of all edges in the (sub-)path (i_k, i_l).
      * NaN (Not-A-Number) if input (sub-)path (i_k, i_l) is not valid.
      */
-    double min_cost_last(int i_k, int i_l, int& min_index);
+    VType min_cost_last(int i_k, int i_l, int& min_index);
 
     /**
      * \brief Vectorize the internal dynamic path data structure to an std::vector.
@@ -115,7 +116,7 @@ class dp_array {
      * \param[out] output std::vector to hold the vectorized results.
      * \return True if the vectorization is successful, False otherwise.
      */
-    bool vectorize(std::vector<double>& output) const;
+    bool vectorize(std::vector<VType>& output) const;
 
     /**
      * \brief Get number of edges in the dynamic path.
@@ -133,7 +134,7 @@ class dp_array {
 
   private:
     // Data field
-    std::vector<TreeNode*> m_external_nodes;
-    TreeNode* m_root = nullptr;
-    dynamic_path_ops m_dp_ops;
+    std::vector<TreeNode<VType>*> m_external_nodes;
+    TreeNode<VType>* m_root = nullptr;
+    dynamic_path_ops<VType> m_dp_ops;
 };
