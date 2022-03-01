@@ -286,7 +286,7 @@ static bool operator == (const dp_array<VType>& dynamic_array, const std::vector
     }
 
     for (std::size_t i = 0; i < output.size(); ++i) {
-        if (fabs(dynamic_array.edge_cost(static_cast<int>(i)) - reference[i]) >= 1e-6) {
+        if (fabs(*dynamic_array.edge_cost(static_cast<int>(i)) - reference[i]) >= 1e-6) {
             return false;
         }
 
@@ -410,7 +410,7 @@ void time_benchmarking() {
     // Find minimums of the (sub-)path.
     int min_index;
     start = std::chrono::steady_clock::now();
-    double min_cost = dynamic_array.min_cost_first(0, min_index);
+    double min_cost = *dynamic_array.min_cost_first(0, min_index);
     end = std::chrono::steady_clock::now();
     std::cout << "Find the minimum edge cost in the path in time "
         << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
@@ -430,7 +430,7 @@ void time_benchmarking() {
     assert(fabs(min_cost_ref - min_cost) < 1e-6);
 
     start = std::chrono::steady_clock::now();
-    min_cost = dynamic_array.min_cost_last(static_cast<int>(maxNum / 4), static_cast<int>(maxNum / 2), min_index);
+    min_cost = *dynamic_array.min_cost_last(static_cast<int>(maxNum / 4), static_cast<int>(maxNum / 2), min_index);
     end = std::chrono::steady_clock::now();
     std::cout << "Find the minimum edge cost in the sub-path (" << std::to_string(maxNum / 4) << ", " << std::to_string(maxNum / 2) << ") in time "
         << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
