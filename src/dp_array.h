@@ -12,6 +12,7 @@ Date Created: Oct. 27, 2016.
 
 #include "dynamic_path.h"
 
+#include <optional>
 #include <vector>
 
 /**
@@ -41,7 +42,7 @@ class dp_array {
      * \param[in] i_k Head index of the edge.
      * \return cost of edge (i_k, i_k+1). NaN (Not-A-Number) if input i_k is not valid.
      */
-    VType edge_cost(int i_k) const;
+    std::optional<VType> edge_cost(int i_k) const;
 
     /**
      * \brief Update costs of all edges in the (sub-)path (i_k, tail) by a constant w.
@@ -70,7 +71,7 @@ class dp_array {
      * \return Minimum edge cost of all edges in the (sub-)path (i_k, tail).
      * NaN (Not-A-Number) if input i_k is not valid.
      */
-    VType min_cost_first(int i_k, int& min_index);
+    std::optional<VType> min_cost_first(int i_k, int& min_index);
 
     /**
      * \brief Get the minimum edge cost of all edges in the (sub-)path (i_k, i_l),
@@ -83,7 +84,7 @@ class dp_array {
      * \return Minimum edge cost of all edges in the (sub-)path (i_k, i_l).
      * NaN (Not-A-Number) if input (sub-)path (i_k, i_l) is not valid.
      */
-    VType min_cost_first(int i_k, int i_l, int& min_index);
+    std::optional<VType> min_cost_first(int i_k, int i_l, int& min_index);
 
     /**
      * \brief Get the minimum edge cost of all edges in the (sub-)path (i_k, tail),
@@ -95,7 +96,7 @@ class dp_array {
      * \return Minimum edge cost of all edges in the (sub-)path (i_k, tail).
      * NaN (Not-A-Number) if input i_k is not valid.
      */
-    VType min_cost_last(int i_k, int& min_index);
+    std::optional<VType> min_cost_last(int i_k, int& min_index);
 
     /**
      * \brief Get the minimum edge cost of all edges in the (sub-)path (i_k, i_l),
@@ -108,7 +109,7 @@ class dp_array {
      * \return Minimum edge cost of all edges in the (sub-)path (i_k, i_l).
      * NaN (Not-A-Number) if input (sub-)path (i_k, i_l) is not valid.
      */
-    VType min_cost_last(int i_k, int i_l, int& min_index);
+    std::optional<VType> min_cost_last(int i_k, int i_l, int& min_index);
 
     /**
      * \brief Vectorize the internal dynamic path data structure to an std::vector.
